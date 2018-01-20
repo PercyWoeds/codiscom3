@@ -1,5 +1,5 @@
 class ActionCorreo < ApplicationMailer
-  	  default from: 'factura-electronica@codiscom.com'
+  	  default from: 'factura-electronica@hidrotransp.com'
 
 
 	  def bienvenido_email(invoice)
