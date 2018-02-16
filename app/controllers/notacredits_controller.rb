@@ -225,6 +225,7 @@ Banco de CREDITO Cuenta Corriente soles : 191-2231128-0-45 CCI : 002191002231128
         
     def sendmail      
 
+        
         lib = File.expand_path('../../../lib', __FILE__)
         $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 
@@ -244,10 +245,12 @@ Banco de CREDITO Cuenta Corriente soles : 191-2231128-0-45 CCI : 002191002231128
           File.delete(file)
         end 
 
+     if $lcTd == 1   
+
        credit_note_data = { issue_date: Date.new($aa,$mm,$dd), id: $lcNumeroNota, customer: {legal_name:$lcLegalName , ruc:$lcRuc },
                              billing_reference: {id: $lcBillingReference, document_type_code: "01"},
                              discrepancy_response: {reference_id: $lcBillingReference, response_code: "09", description: $lcDescrip},
-                             lines: [{id: "1", item: {id: "05", description: "DIESEL B5 S-50"}, quantity: $lcCantidad, unit: 'GLL', 
+                             lines: [{id: "1", item: {id: "05", description: $lcDescrip2}, quantity: $lcCantidad, unit: 'GLL', 
                                   price: {value: $lcPrecioSIgv}, pricing_reference: $lcPrecioCigv, tax_totals: [{amount: $lcIgv, type: :igv, code: "10"}], line_extension_amount:$lcVVenta }],
                              additional_monetary_totals: [{id: "1001", payable_amount: $lcVVenta}], tax_totals: [{amount: $lcIgv, type: :igv}], legal_monetary_total: $lcTotal}
         
@@ -256,8 +259,11 @@ Banco de CREDITO Cuenta Corriente soles : 191-2231128-0-45 CCI : 002191002231128
         if credit_note.valid?          
           credit_note.to_pdf
           File::open("credit_note.xml", "w") { |file| file.write(credit_note.to_xml) }
-          $lcFileName1 = File.expand_path('../../../', __FILE__)+ "/"+$lcFileName                  
-          $lcFile2     = File.expand_path('../../../../', __FILE__)+"/"+$lcFilezip
+
+          
+          $lcFileName1 = File.expand_path('../../../', __FILE__)+ "/"+$lcFileName        
+            
+          $lcFile2     = File.expand_path('../../../', __FILE__)+"/credit_note.xml"
 
           #$lcFile2     = File.expand_path('../../../../', __FILE__)+"/sunat-ruby9/credit_note.xml"        
 
@@ -267,9 +273,39 @@ Banco de CREDITO Cuenta Corriente soles : 191-2231128-0-45 CCI : 002191002231128
         else
           $aviso =  "Invalid document, ignoring output: #{credit_note.errors.messages}"
         end
-        
-        $lcGuiaRemision =""            
+                
+      else
 
+          debit_note_data = { issue_date: Date.new($aa,$mm,$dd), id: $lcNumeroNota, customer: {legal_name:$lcLegalName , ruc:$lcRuc },
+                     billing_reference: {id: $lcBillingReference, document_type_code: "01"},
+                     discrepancy_response: {reference_id: $lcBillingReference, response_code: "02", description: $lcDescrip},
+                     lines: [{id: "1", item: {id: "05", description: $lcDescrip2}, quantity: $lcCantidad, unit: 'GLL', 
+                          price: {value: $lcPrecioSIgv}, pricing_reference: $lcPrecioCigv, tax_totals: [{amount: $lcIgv, type: :igv, code: "10"}], line_extension_amount:$lcVVenta }],
+                     additional_monetary_totals: [{id: "1001", payable_amount: $lcVVenta}], tax_totals: [{amount: $lcIgv, type: :igv}], legal_monetary_total: $lcTotal}
+
+          debit_note = SUNAT::DebitNote.new(debit_note_data)
+          
+
+        if debit_note.valid?
+            debit_note.to_pdf
+            File::open("debit_note.xml", "w") { |file| file.write(debit_note.to_xml) }
+            $lcFileName1 = File.expand_path('../../../', __FILE__)+ "/"+$lcFileName
+              $lcFile2     = File.expand_path('../../../', __FILE__)+"/debit_note.xml"
+
+            ActionCorreo.bienvenido_email(@invoice).deliver    
+            @mailing = Mailing.new(:td =>$lcTd, :serie => 'FF01', :numero => $lcDocument_serial_id, :ruc=>$lcRuc, :flag1 => '1')
+            @mailing.save      
+
+        else
+          
+          $aviso = "Invalid document, ignoring output: #{debit_note.errors.messages}"          
+        end
+
+
+
+      end 
+
+        $lcGuiaRemision =""            
     end
 
 
