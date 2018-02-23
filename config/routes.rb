@@ -52,6 +52,7 @@ end
 
    resources :voideds do
     collection { post :anular }  
+    collection { post :anular2 }  
    end 
 
    get '/about', to: 'layouts#about'
