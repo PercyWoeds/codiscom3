@@ -324,6 +324,17 @@ Banco de CREDITO Cuenta Corriente soles : 191-2231128-0-45 CCI : 002191002231128
   def create
     @notacredit = Notacredit.new(notacredit_params)
 
+   @customers = Client.all.order(:vrazon2)
+    @quantity = params[:notacredit][:quantity] 
+    @precio = params[:notacredit][:price] 
+    
+    @notacredit[:subtotal] = @quantity.to_f  * @precio.to_f
+    @notacredit[:total] = @notacredit[:subtotal] * 1.18
+    @notacredit[:tax]  = @notacredit[:total] - @notacredit[:subtotal]
+   
+
+    
+
     respond_to do |format|
       if @notacredit.save
         format.html { redirect_to @notacredit, notice: 'Notacredit was successfully created.' }
@@ -338,6 +349,14 @@ Banco de CREDITO Cuenta Corriente soles : 191-2231128-0-45 CCI : 002191002231128
   # PATCH/PUT /notacredits/1
   # PATCH/PUT /notacredits/1.json
   def update
+      @quantity = params[:notacredit][:quantity] 
+    @precio = params[:notacredit][:price] 
+    @notacredit[:subtotal] = @quantity.to_f  * @precio.to_f
+   @notacredit[:total] = @notacredit[:subtotal] * 1.18
+   @notacredit[:tax]  = @notacredit[:total] - @notacredit[:subtotal]
+   
+  
+    
     respond_to do |format|
       if @notacredit.update(notacredit_params)
         format.html { redirect_to @notacredit, notice: 'Notacredit was successfully updated.' }
@@ -367,6 +386,6 @@ Banco de CREDITO Cuenta Corriente soles : 191-2231128-0-45 CCI : 002191002231128
 
     # Never trust parameters from the scary internet, only allow the white list through.
     def notacredit_params
-      params.require(:notacredit).permit(:fecha, :code, :nota_id, :motivo, :subtotal, :tax, :total, :moneda_id, :mod_factura, :mod_tipo, :processed, :tipo, :description, :client_id,:price,:quantity,:notum_id)
+      params.require(:notacredit).permit(:fecha, :code, :nota_id, :motivo, :subtotal, :tax, :total, :moneda_id, :mod_factura, :mod_tipo, :processed, :tipo, :description, :client_id,:price,:quantity,:notum_id,:nombre)
     end
 end

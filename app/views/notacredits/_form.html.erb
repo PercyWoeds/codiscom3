@@ -36,7 +36,7 @@
    <div class="field">
     <%= f.label :client_id %><br>
     <% if @edit %>
-    <%= f.select :client_id,options_from_collection_for_select(@customers,'id','vrazon2',:selected => @notacredit.client_id)%> %>
+    <%= f.select :client_id,options_from_collection_for_select(@customers,'id','vrazon2',:selected => @notacredit.client_id)%>
     <% else %>
     <%= f.select :client_id,options_from_collection_for_select(@customers,'id','vrazon2') %>
     <% end %>
@@ -44,35 +44,36 @@
   
   <div class="field">
     <%= f.label :quantity,"Cantidad " %><br>
-    <%= f.text_field :quantity %>
+    <%= f.number_field :quantity,  :step => 0.01 %>
   </div>
   
   <div class="field">
     <%= f.label :price ,"Precio "%><br>
-    <%= f.text_field :price %>
+    <%= f.number_field :price, :step => 0.01 %>
   </div>
     
   <div class="field">
     <%= f.label :subtotal %><br>
-    <%= f.text_field :subtotal %>
+    
+   <span id="notacredit_subtotal">0.00</span>
   </div>
   <div class="field">
     <%= f.label :tax %><br>
-    <%= f.text_field :tax %>
+    <span id="notacredit_tax">0.00</span>
   </div>
   <div class="field">
     <%= f.label :total %><br>
-    <%= f.text_field :total %>
+    <span id="notacredit_total">0.00</span>
   </div>
   <div class="field">
        <%= f.label :moneda_id ,"Moneda "%><br />
      <%= f.select :moneda_id , options_for_select([["SOLES",1],["DOLARES",2]]) %>
    </div>
   <div class="field">
-    <%= f.label :mod_tipo,"Catalogo de motivos " %><br>  
+    <%= f.label :notum_id,"Catalogo de motivos " %><br>  
 
     <% if @edit %>
-    <%= f.select :notum_id,options_from_collection_for_select(@notas,'id','descrip',:selected => @notacredit.nota_id)%> %>
+    <%= f.select :notum_id,options_from_collection_for_select(@notas,'id','descrip',:selected => @notacredit.nota_id)%> 
     <% else %>
     <%= f.select :notum_id,options_from_collection_for_select(@notas,'id','descrip') %>
     <% end %>
@@ -84,10 +85,46 @@
   </div>
 
   <div class="field">
-    <%= f.label :description %><br>
-    <%= f.text_area :description %>
+    <%= f.label :nombre %><br>
+    <%= f.text_field :nombre %>
   </div>
   <div class="actions">
-    <%= f.submit %>
+    <%= f.submit  %>
   </div>
 <% end %>
+
+
+<script type="text/javascript">
+
+  $(document).on('turbolinks:load', function() {
+    
+      $("#notacredit_quantity").bind("keyup", function() {
+        calculoTotal();
+      });
+      
+      $("#notacredit_price").bind("keyup", function() {
+        calculoTotal();
+      });
+      
+    });
+    
+function calculoTotal()
+    {
+      var quantity = $("#notacredit_quantity").val();
+      var price    = $("#notacredit_price").val();
+      
+      var vventa = round(quantity * price,2);
+      var total = round(vventa  * 1.18,2 );
+      var igv = round(total - vventa ,2);
+      
+      $("#notacredit_total").html(total);
+      $("#notacredit_subtotal").html(vventa);
+      $("#notacredit_tax").html(igv);
+      
+    }
+    
+ function round(value, decimals) {
+      return Number(Math.round(value+'e'+decimals)+'e-'+decimals);
+  }
+  
+</script>
