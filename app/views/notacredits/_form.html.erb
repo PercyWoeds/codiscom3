@@ -113,8 +113,8 @@ function calculoTotal()
       var quantity = $("#notacredit_quantity").val();
       var price    = $("#notacredit_price").val();
       
-      var vventa = round(quantity * price,2);
-      var total = round(vventa  * 1.18,2 );
+      var total  = round(quantity * price,2);
+      var vventa = round(total  / 1.18,2 );
       var igv = round(total - vventa ,2);
       
       $("#notacredit_total").html(total);
